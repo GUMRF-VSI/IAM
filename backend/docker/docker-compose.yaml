@@ -1,0 +1,32 @@
+version: '3.7'
+
+networks:
+  appeals-service:
+    driver: bridge
+
+services:
+  appeals-postgresql:
+    restart: always
+    image: postgres:latest
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/auth_data
+    ports:
+      - ${POSTGRES_PORT}:5432
+    networks:
+      - appeals-service
+
+  appeals-service:
+    restart: always
+    depends_on:
+      - appeals-postgresql
+    env_file:
+      - .env
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - 8000:8000
+    networks:
+      - appeals-service
