@@ -1,11 +1,11 @@
 version: '3.7'
 
 networks:
-  appeals-service:
+  auth-service:
     driver: bridge
 
 services:
-  appeals-postgresql:
+  auth-postgresql:
     restart: always
     image: postgres:latest
     env_file:
@@ -15,12 +15,12 @@ services:
     ports:
       - ${POSTGRES_PORT}:5432
     networks:
-      - appeals-service
+      - auth-service
 
-  appeals-service:
+  auth-service:
     restart: always
     depends_on:
-      - appeals-postgresql
+      - auth-postgresql
     env_file:
       - .env
     build:
@@ -29,4 +29,4 @@ services:
     ports:
       - 8000:8000
     networks:
-      - appeals-service
+      - auth-service
