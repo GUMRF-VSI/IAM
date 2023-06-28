@@ -55,23 +55,3 @@ class ActionBase(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-class UserSchema(UserBase):
-    users: List[UserBase]
-
-
-class RoleSchema(RoleBase):
-    roles: List[RoleBase]
-
-
-class PermissionSchema(PermissionBase):
-    permissions: List[PermissionBase]
-
-
-class ObjectSchema(ObjectBase):
-    objects: List[ObjectBase]
-
-
-class ActionSchema(ActionBase):
-    actions: List[ActionBase]
