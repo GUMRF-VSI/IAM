@@ -2,11 +2,9 @@ from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Table, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-from constants.types import ChoiceType
-from constants.constants import OBJECTS, ACTIONS
-
-
-Base = declarative_base()
+from database.models.types import ChoiceType
+from database.postgres import Base
+from config.constants import OBJECTS, ACTIONS
 
 
 role_permission = Table('roles_permissions', Base.metadata,

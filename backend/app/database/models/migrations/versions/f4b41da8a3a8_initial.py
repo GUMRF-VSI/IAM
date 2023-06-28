@@ -1,19 +1,19 @@
 """initial
 
-Revision ID: e6a6ed1c319d
+Revision ID: f4b41da8a3a8
 Revises: 
-Create Date: 2023-06-27 18:57:46.744320
+Create Date: 2023-06-28 20:24:53.377509
 
 """
 from alembic import op
 import sqlalchemy as sa
 
-from constants.types import ChoiceType
-from constants.constants import OBJECTS, ACTIONS
+from database.models.types import ChoiceType
+from config.constants import OBJECTS, ACTIONS
 
 
 # revision identifiers, used by Alembic.
-revision = 'e6a6ed1c319d'
+revision = 'f4b41da8a3a8'
 down_revision = None
 branch_labels = None
 depends_on = None

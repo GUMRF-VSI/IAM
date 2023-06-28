@@ -6,10 +6,8 @@
   * [Запуск при помощи Dokcer](#запуск-при-помощи-dokcer)
     * [Опционально](#опционально)
 * [Работа с миграциями](#работа-с-миграциями)
-  * [Применение конкретной миграции](#откат-конкретной-миграции)
-  * [Применение последних миграций](#применение-последних-миграций)
-  * [Откат конкретной миграции](#откат-конкретной-миграции)
-  * [Откат всех миграций](#откат-всех-миграций)
+  * [Инициализация миграций](#инициализация-миграций)
+  * [Настройка скрипта](#настройка-скрипта)
 
 ---
 
@@ -28,76 +26,51 @@
 
 ## Работа с миграциями
 
-### Создание миграций
+Информацию о создании миграций и работе с ними можно найти [тут](./app/database/models/migrations/README.md)
 
-#### Автоматическая генерация миграций 
+### Инициализация миграций
 
-```shell
-alembic revision --autogenerate -m '<migration name>'
-```
-
-### Применение конкретной миграции
-
-Для применения конкретной миграции необходимо после `upgrade` указать `revision` миграции, значение которой находится в 
-файле необходимой миграции в директории `migration/versions/...`.
+Для того чтобы инициализировать скрипт создания миграций, нужно выполнить команду.
 
 ```shell
-alembic upgrade <migration revision>
+alembic init <желаемое расположение миграций>/migrations
 ```
 
-#### Пример
+### Настройка скрипта
 
-`./migration/versions/1a2b34cd5e67.py`
+Для корректной работы миграций, необходима настройка скрипта создания миграций. Сначала нужно настроить `alembic.ini`. 
+В файле нужно заменить строку `sqlalchemy.url = driver://user:pass@localhost/dbname` на 
+`sqlalchemy.url = <dialect>://%(<USER>)s:%(<PASSWORD>)s@%(<HOST>)s/%(<DB>)s`, где dialect - используемая база данных,
+USER, PASSWORD, HOST, DB - данные для подключения к БД.
+
+После чего нужно настроить файл `<желаемое расположение миграций>/migrations/env.py`. 
+
+Добавить импорт и использование класса Base из файла моделей. 
 
 ```python
 ...
-# revision identifiers, used by Alembic.
-revision = '1a2b34cd5e67'
-down_revision = None
-branch_labels = None
-depends_on = None
+from database.models.models import Base
+...
+target_metadata = Base.metadata
 ...
 ```
-
-```shell
-alembic upgrade 1a2b34cd5e67
-```
-
-### Применение последних миграций
-
-```shell
-alembic upgrade head
-```
-
-### Откат конкретной миграции
-
-Для применения конкретной миграции необходимо после `upgrade` указать `revision` миграции, значение которой находится в 
-файле необходимой миграции в директории `migration/versions/...`.
-
-```shell
-alembic downgrade <migration revision>
-```
-
-#### Пример
-
-`./migration/versions/1a2b34cd5e67.py`
 
 ```python
-...
-# revision identifiers, used by Alembic.
-revision = '1a2b34cd5e67'
-down_revision = None
-branch_labels = None
-depends_on = None
-...
+from alembic import context
+
+from <ваш файл настроект> import settings
+
+config = context.config
+
+section = config.config_ini_section
+config.set_section_option(section, 'POSTGRES_USER', settings.USER)
+config.set_section_option(section, 'POSTGRES_PASSWORD', settings.PASSWORD)
+config.set_section_option(section, 'POSTGRES_HOST', settings.DB_HOST)
+config.set_section_option(section, 'POSTGRES_PORT', settings.PORT)
+config.set_section_option(section, 'POSTGRES_DB', settings.DB)
 ```
 
-```shell
-alembic downgrade 1a2b34cd5e67
-```
+#### Важно
 
-### Откат всех миграций
-
-```shell
-alembic downgrade base
-```
+1. Необходимо использовать для настроек `pydantic.BaseSettings`
+2. Для создания миграций в качестве `DB_HOST` нужно использовать внешний порт для подключения базы данных. 
