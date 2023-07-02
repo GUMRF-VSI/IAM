@@ -11,7 +11,7 @@ ModelType = TypeVar("ModelType", bound=BaseModel)
 class BaseExceptions:
     model: ModelType
     __404_message: str = 'не найден'
-    __default_404_message: str = ''
+    __default_404_message: str = 'Не найдено'
 
     def __init__(self, model: Type[ModelType]):
         self.model = model
@@ -25,4 +25,4 @@ class BaseExceptions:
         if model_name:
             return HTTPException(status_code=404, detail=f'{model_name} {self.__404_message}')
         else:
-            return HTTPException(status_code=404, detail=f'{model_name} {self.__default_404_message}')
+            return HTTPException(status_code=404, detail=self.__default_404_message)
