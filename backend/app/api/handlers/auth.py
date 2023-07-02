@@ -1,28 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from sqlalchemy.orm import Session
 
-from api.deps.databse import get_database
 from database import crud
+from config.security import schemas, token
 from schemas import user as user_schemas
-from config.security import auth
+from api.deps.databse import get_database
+from api import exceptions
 
 router = APIRouter()
 
 
 @router.post("/registration")
 async def registration(user_data: user_schemas.UserCreate,
-                       db: Session = Depends(get_database)) -> auth.schemas.TokenData:
+                       db: Session = Depends(get_database)) -> schemas.TokenData:
     if crud.user.get_by_email(db=db, email=user_data.email):
-        raise HTTPException(status_code=400, detail="Данный email уже используется")
+        raise exceptions.user.duplicate_email
     user = crud.user.create(db=db, obj_in=user_data)
-    return auth.token.generate_token(user)
+    return token.generate_token(user)
 
 
 @router.post("/authorization")
-async def authorization(auth_data: auth.schemas.UserAuth,
-                        db: Session = Depends(get_database)) -> auth.schemas.TokenData:
-    user = crud.user.authenticate(db=db, email=auth_data.email, password=auth_data.password)
+async def authorization(auth_data: schemas.UserAuth,
+                        db: Session = Depends(get_database)) -> schemas.TokenData:
+    user = crud.user.authenticate(db=db, email=auth_data.email, raw_password=auth_data.password)
     if not user:
-        raise HTTPException(status_code=400, detail="Неверный email или пароль")
-    return auth.token.generate_token(user)
+        raise exceptions.user.invalid_cred
+    return token.generate_token(user)

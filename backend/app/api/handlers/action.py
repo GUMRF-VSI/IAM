@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from database import crud
 from schemas import action
 from api.deps.databse import get_database
+from api import exceptions
 
 router = APIRouter()
 
@@ -18,7 +19,7 @@ async def create_action(action_data: action.CreateAction, db: Session = Depends(
 async def get_action(action_id: int, db: Session = Depends(get_database)) -> action.ActionORM:
     db_action = crud.action.get(db=db, id=action_id)
     if not db_action:
-        raise HTTPException(status_code=404, detail="Действие не найдено")
+        raise exceptions.action.not_found
     return db_action
 
 
@@ -27,7 +28,7 @@ async def update_action(action_id: int, action_data: action.ActionUpdate,
                         db: Session = Depends(get_database)) -> action.ActionORM:
     db_action = crud.action.get(db=db, id=action_id)
     if not db_action:
-        raise HTTPException(status_code=404, detail="Действие не найдено")
+        raise exceptions.action.not_found
     return crud.action.update(db=db, db_obj=db_action, obj_in=action_data)
 
 
@@ -35,7 +36,7 @@ async def update_action(action_id: int, action_data: action.ActionUpdate,
 async def delete_action(action_id: int, db: Session = Depends(get_database)):
     status = crud.action.remove(db=db, id=action_id)
     if not status:
-        raise HTTPException(status_code=404, detail="Действие не найдено")
+        raise exceptions.action.not_found
     return HTTPException(status_code=200)
 
 

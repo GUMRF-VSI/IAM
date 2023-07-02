@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from database import crud
 from schemas import object
+from api import exceptions
 from api.deps.databse import get_database
 
 router = APIRouter()
@@ -18,7 +19,7 @@ async def create_object(object_data: object.CreateObject, db: Session = Depends(
 async def get_object(action_id: int, db: Session = Depends(get_database)) -> object.ObjectORM:
     db_object = crud.obj.get(db=db, id=action_id)
     if not db_object:
-        raise HTTPException(status_code=404, detail="Объект не найдено")
+        raise exceptions.obj.not_found
     return db_object
 
 
@@ -27,7 +28,7 @@ async def update_object(object_id: int, object_data: object.ObjectUpdate,
                         db: Session = Depends(get_database)) -> object.ObjectORM:
     db_action = crud.obj.get(db=db, id=object_id)
     if not db_action:
-        raise HTTPException(status_code=404, detail="Объект не найдено")
+        raise exceptions.obj.not_found
     return crud.obj.update(db=db, db_obj=db_action, obj_in=object_data)
 
 
@@ -35,7 +36,7 @@ async def update_object(object_id: int, object_data: object.ObjectUpdate,
 async def delete_object(object_id: int, db: Session = Depends(get_database)):
     status = crud.obj.remove(db=db, id=object_id)
     if not status:
-        raise HTTPException(status_code=404, detail="Объект не найдено")
+        raise exceptions.obj.not_found
     return HTTPException(status_code=200)
 
 
