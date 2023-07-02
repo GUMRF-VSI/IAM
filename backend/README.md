@@ -45,13 +45,14 @@ USER, PASSWORD, HOST, DB - данные для подключения к БД.
 
 После чего нужно настроить файл `<желаемое расположение миграций>/migrations/env.py`. 
 
-Добавить импорт и использование класса Base из файла моделей. 
+Добавить импорт и использование класса Base из файла моделей.
 
 ```python
 ...
-from database.models.models import Base
+from database.models.models import BaseModel
+
 ...
-target_metadata = Base.metadata
+target_metadata = BaseModel.metadata
 ...
 ```
 

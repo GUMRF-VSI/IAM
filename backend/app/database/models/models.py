@@ -4,20 +4,20 @@ from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, Table, Date
 from sqlalchemy.orm import relationship
 
 from database.models.types import ChoiceType
-from database.core.base_class import Base
+from database.core.base_class import BaseModel
 from constants.objects import OBJECTS
 from constants.actions import ACTIONS
 
-role_permission = Table('role_permission', Base.metadata,
+role_permission = Table('role_permission', BaseModel.metadata,
                         Column('role_id', ForeignKey('role.id'), primary_key=True),
                         Column('permission_id', ForeignKey('permission.id'), primary_key=True))
 
-user_role = Table('user_role', Base.metadata,
+user_role = Table('user_role', BaseModel.metadata,
                   Column('user_id', ForeignKey('user.id'), primary_key=True),
                   Column('role_id', ForeignKey('role.id'), primary_key=True))
 
 
-class User(Base):
+class User(BaseModel):
     id = Column(Integer, primary_key=True, unique=True, index=True)
 
     email: str = Column(String, unique=True, index=True)
@@ -46,7 +46,7 @@ class User(Base):
         return sub == self.get_sub()
 
 
-class Role(Base):
+class Role(BaseModel):
     id = Column(Integer, primary_key=True, unique=True, index=True)
     name = Column(String)
 
@@ -54,7 +54,7 @@ class Role(Base):
     permissions = relationship('Permission', secondary=role_permission, back_populates='roles')
 
 
-class Permission(Base):
+class Permission(BaseModel):
     id = Column(Integer, primary_key=True, unique=True, index=True)
     name = Column(String)
 
@@ -64,13 +64,13 @@ class Permission(Base):
     roles = relationship('Role', secondary=role_permission, back_populates='permissions')
 
 
-class Object(Base):
+class Object(BaseModel):
     id = Column(Integer, primary_key=True, unique=True, index=True)
     name = Column(String)
     code = Column(ChoiceType(OBJECTS), nullable=False)
 
 
-class Action(Base):
+class Action(BaseModel):
     id = Column(Integer, primary_key=True, unique=True, index=True)
     name = Column(String)
     code = Column(ChoiceType(ACTIONS), nullable=False)
