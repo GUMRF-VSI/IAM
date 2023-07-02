@@ -5,7 +5,8 @@ from sqlalchemy.orm import relationship
 
 from database.models.types import ChoiceType
 from database.core.base_class import Base
-from config.constants import OBJECTS, ACTIONS
+from constants.objects import OBJECTS
+from constants.actions import ACTIONS
 
 role_permission = Table('role_permission', Base.metadata,
                         Column('role_id', ForeignKey('role.id'), primary_key=True),

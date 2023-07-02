@@ -5,19 +5,19 @@ from sqlalchemy.orm import Session
 from config.security import password
 from database.crud.base import CRUDBase
 from database.models import models
-from database.schemas import user as user_schemas
+from schemas import user as user_schemas
 
 
 class CRUDUser(CRUDBase[models.User, user_schemas.UserCreate, user_schemas.UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[models.User]:
-        return db.query(models.User).filter(models.User.email == email).first()
+        return db.query(self.model).filter(self.model.email == email).first()
 
     def create(self, db: Session, *, obj_in: user_schemas.UserCreate) -> models.User:
-        db_obj = models.User(email=obj_in.email,
-                             last_name=obj_in.last_name,
-                             first_name=obj_in.first_name,
-                             middle_name=obj_in.middle_name,
-                             password=password.get_password_hash(obj_in.password))
+        db_obj = self.model(email=obj_in.email,
+                            last_name=obj_in.last_name,
+                            first_name=obj_in.first_name,
+                            middle_name=obj_in.middle_name,
+                            password=password.get_password_hash(obj_in.password))
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

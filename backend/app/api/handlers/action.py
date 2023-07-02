@@ -1,33 +1,45 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
+from database import crud
+from schemas import action
 from api.deps.databse import get_database
 
 router = APIRouter()
 
 
-@router.post("/", )  # TODO Доступ только для определенных ролей
-async def create_action(db: Session = Depends(get_database)):
-    ...  # TODO Логика создания действий
+@router.post("/", response_model=action.ActionORM)  # TODO Доступ только для определенных ролей
+async def create_action(action_data: action.CreateAction, db: Session = Depends(get_database)) -> action.ActionORM:
+    return crud.action.create(db=db, obj_in=action_data)
 
 
-@router.get("/{action_id}", )  # TODO Доступ только для определенных ролей
-async def get_action(db: Session = Depends(get_database)):
-    ...  # TODO Логика получения действия по id
+@router.get("/{action_id}", response_model=action.ActionORM)  # TODO Доступ только для определенных ролей
+async def get_action(action_id: int, db: Session = Depends(get_database)) -> action.ActionORM:
+    db_action = crud.action.get(db=db, id=action_id)
+    if not db_action:
+        raise HTTPException(status_code=404, detail="Действие не найдено")
+    return db_action
 
 
-@router.put("/{action_id}", )  # TODO Доступ только для определенных ролей
-async def update_action(db: Session = Depends(get_database)):
-    ...  # TODO Логика обновления действия
+@router.put("/{action_id}", response_model=action.ActionORM)  # TODO Доступ только для определенных ролей
+async def update_action(action_id: int, action_data: action.ActionUpdate,
+                        db: Session = Depends(get_database)) -> action.ActionORM:
+    db_action = crud.action.get(db=db, id=action_id)
+    if not db_action:
+        raise HTTPException(status_code=404, detail="Действие не найдено")
+    return crud.action.update(db=db, db_obj=db_action, obj_in=action_data)
 
 
-@router.delete("/", )  # TODO Доступ только для определенных ролей
-async def delete_action(db: Session = Depends(get_database)):
-    ...  # TODO Логика удаления действия по id
+@router.delete("/{action_id}", )  # TODO Доступ только для определенных ролей
+async def delete_action(action_id: int, db: Session = Depends(get_database)):
+    status = crud.action.remove(db=db, id=action_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="Действие не найдено")
+    return HTTPException(status_code=200)
 
 
-@router.get("/list", )  # TODO Доступ только для определенных ролей
+# @router.get("/list", )  # TODO Доступ только для определенных ролей
 async def get_actions_list(db: Session = Depends(get_database)):
     ...  # TODO Логика получения всех действий
     ...  # TODO Логика фильтрации действий

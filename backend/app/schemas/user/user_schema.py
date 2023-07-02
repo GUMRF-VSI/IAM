@@ -4,18 +4,21 @@ from datetime import datetime
 
 from typing import Optional
 
-from database.schemas.user import base
+from schemas.user.base import UserBase
 
 
-class UserCreate(base.UserBase):
+class UserCreate(UserBase):
     password: str
 
 
-class UsersListSchema(base.UserBase):
-    users: List[base.UserBase]
+class UsersList(UserBase):
+    class User(UserBase):
+        id: int
+
+    users: List[User]
 
 
-class User(base.UserBase):
+class UserORM(UserBase):
     id: int
 
     is_active: bool = True
@@ -28,5 +31,5 @@ class User(base.UserBase):
         orm_mode = True
 
 
-class UserUpdate(base.UserBase):
+class UserUpdate(UserBase):
     ...
