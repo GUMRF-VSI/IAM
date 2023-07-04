@@ -4,7 +4,9 @@ from pydantic import BaseSettings, BaseModel
 class SecuritySettings(BaseModel):
     ALGORITHM: str = "HS256"
     SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 15
+    IDENTITY_TOKEN_EXPIRE_MINUTES: int = 15
 
 
 class Settings(BaseSettings):

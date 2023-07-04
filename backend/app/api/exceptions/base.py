@@ -2,10 +2,10 @@ from typing import TypeVar, Type, Optional
 
 from fastapi import HTTPException
 
-from database.core.base_class import BaseModel
+from database.core.base_class import Base
 from constants.objects import OBJECTS
 
-ModelType = TypeVar("ModelType", bound=BaseModel)
+ModelType = TypeVar("ModelType", bound=Base)
 
 
 class BaseExceptions:

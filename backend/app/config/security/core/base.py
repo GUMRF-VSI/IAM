@@ -2,8 +2,6 @@ import base64
 
 from passlib.context import CryptContext
 
-from cryptography.fernet import Fernet
-
 from config.settings import settings
 
 
@@ -14,5 +12,3 @@ def base64url_encode(data: str):
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-fernet = Fernet(bytes(settings.SECURITY.SECRET_KEY, 'utf-8'))
