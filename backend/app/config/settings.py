@@ -1,4 +1,5 @@
-from pydantic import BaseSettings, BaseModel
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 
 
 class SecuritySettings(BaseModel):
@@ -22,14 +23,20 @@ class Settings(BaseSettings):
 
     SECURITY: SecuritySettings
 
+    APP_MODELS: list = ["models.user", "models.action", "models.object", "models.permission", "models.role",
+                        "models.session"]
+
     @property
     def postgres_db_url(self):
-        return f'postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
+        return f'postgres://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
+
+    @property
+    def models(self):
+        return self.APP_MODELS + ['aerich.models']
 
     class Config:
-        env_file = "../docker/.env"
+        env_file = ".env"
         case_sensitive = True
-        allow_mutation = False
         env_nested_delimiter = '__'
 
 

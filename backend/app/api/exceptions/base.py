@@ -1,11 +1,10 @@
 from typing import TypeVar, Type, Optional
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
-from database.core.base_class import Base
-from constants.objects import OBJECTS
+from models.base.base_model import CustomModel
 
-ModelType = TypeVar("ModelType", bound=Base)
+ModelType = TypeVar("ModelType", bound=CustomModel)
 
 
 class BaseExceptions:
@@ -17,12 +16,12 @@ class BaseExceptions:
         self.model = model
 
     def get_model_name(self) -> Optional[str]:
-        return OBJECTS.get(self.model.__tablename__)
+        return self.model.Meta.table.capitalize()
 
     @property
     def not_found(self):
         model_name = self.get_model_name()
         if model_name:
-            return HTTPException(status_code=404, detail=f'{model_name} {self.__404_message}')
+            return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'{model_name} {self.__404_message}')
         else:
-            return HTTPException(status_code=404, detail=self.__default_404_message)
+            return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=self.__default_404_message)

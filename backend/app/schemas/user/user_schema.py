@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 from schemas.user.base import UserBase
+from schemas.role import RoleORM
 
 
 class UserCreate(UserBase):
@@ -19,13 +20,15 @@ class UsersList(UserBase):
 
 
 class UserORM(UserBase):
-    id: int
+    id: str
 
     is_active: bool = True
     last_login: Optional[datetime]
 
     created_at: datetime
     updated_at: Optional[datetime]
+
+    roles: List[RoleORM]
 
     class Config:
         orm_mode = True

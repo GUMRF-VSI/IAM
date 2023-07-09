@@ -19,7 +19,7 @@ RUN python -m pip install pip --upgrade \
 COPY . /app
 
 # Копируем скрипт для запуска проекта
-RUN cp docker/entrypoint.sh ./ && chmod +x ./entrypoint.sh
+RUN cp script/entrypoint.sh ./ && chmod +x ./entrypoint.sh
 
 # Создаем пользователя
 RUN groupadd --gid 1001 app \
