@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from api.exceptions.base import BaseExceptions
-from database.models.models import Action
+from models import Action
 
 
 class ActionExceptions(BaseExceptions):

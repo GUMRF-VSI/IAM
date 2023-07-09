@@ -268,3 +268,4 @@ cython_debug/
 #.idea/
 
 !/docker/.env
+/docker/.env
