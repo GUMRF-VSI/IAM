@@ -1,15 +1,25 @@
-from models import Session
-from security.utils.parse_token import parse_token
-from schemas.token import RefreshToken, RefreshTokenData
+from fastapi import Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 from api import exceptions
+from schemas.token import RefreshToken
+from security.utils import token as token_utils
+from models import session as session_models, user as user_models
+
+token_key = HTTPBearer()
 
 
-async def validate_refresh_token(refresh_token: RefreshToken) -> RefreshTokenData:
-    refresh_token_data = parse_token(refresh_token.refresh)
+async def validate_access_token(auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> user_models.User:
+    token_data = await token_utils.validate_access_token(auth_token.credentials)
+    return await user_models.User.filter(uuid=token_data.sub).first()
 
-    session = await Session.filter(uuid=refresh_token_data.sid).first()
+
+async def validate_refresh_token(refresh_token: RefreshToken) -> session_models.Session:
+    refresh_token_data = token_utils.parse_refresh_token(refresh_token.refresh)
+
+    session = await session_models.Session.filter(uuid=refresh_token_data.sid).first()
 
     if not session:
         raise exceptions.token.invalid_token
 
-    return refresh_token_data
+    return session

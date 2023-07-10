@@ -13,13 +13,13 @@ async def create_access_token(user: User, session: Session, exp: int, iat: int, 
     roles = await get_user_riles(user)
     access_token_data = token.AccessTokenData(exp=exp, sid=session.uuid.__str__(), iat=iat,
                                               sub=user.uuid.__str__(), auth_time=auth_time, roles=roles)
-    return jwt.encode(access_token_data.model_dump(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
+    return jwt.encode(access_token_data.dict(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
 
 
 def __create_refresh_token(user: User, session: Session, exp: int, iat: int) -> str:
     refresh_token_data = token.RefreshTokenData(exp=exp, sid=session.uuid.__str__(), iat=iat,
                                                 sub=user.uuid.__str__())
-    return jwt.encode(refresh_token_data.model_dump(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
+    return jwt.encode(refresh_token_data.dict(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
 
 
 def __create_identity_token(user: User, session: Session, exp: int, iat: int) -> str:
@@ -28,7 +28,7 @@ def __create_identity_token(user: User, session: Session, exp: int, iat: int) ->
         last_name=user.last_name,
         first_name=user.first_name, middle_name=user.middle_name, is_active=user.is_active
     )
-    return jwt.encode(identity_token_data.model_dump(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
+    return jwt.encode(identity_token_data.dict(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
 
 
 async def generate_tokens(user: User, session: Session,

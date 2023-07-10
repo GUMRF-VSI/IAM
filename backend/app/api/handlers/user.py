@@ -2,9 +2,9 @@ from uuid import UUID
 
 from typing import List
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Response, status, Depends
 
-from api import exceptions
+from api import exceptions, deps
 from models import user as user_models
 from schemas import user as user_schemas
 from db.shortcuts import get_object_or_404
@@ -19,7 +19,7 @@ async def create_user(user_data: user_schemas.UserCreate) -> user_models.User:
     if is_user_exist:
         raise exceptions.user.duplicate_user
 
-    db_user = user_models.User(**user_data.model_dump())
+    db_user = user_models.User(**user_data.dict())
     db_user.set_password(user_data.password)
     await db_user.save()
 
@@ -41,7 +41,7 @@ async def user_retrieve(user_id: UUID) -> user_models.User:
 @router.patch('/user_id', response_model=user_schemas.UserORM)
 async def update_user(user_id: UUID, user_data: user_schemas.UserUpdate):
     db_user = await get_object_or_404(user_models.User, uuid=user_id)
-    await db_user.update_from_dict(**user_data.model_dump())
+    await db_user.update_from_dict(**user_data.dict())
     return db_user
 
 
@@ -49,4 +49,15 @@ async def update_user(user_id: UUID, user_data: user_schemas.UserUpdate):
 async def delete_user(user_id: UUID):
     db_user = await get_object_or_404(user_models.User, uuid=user_id)
     await db_user.delete()
+    return Response(status_code=status.HTTP_200_OK, content='success')
+
+
+@router.post('/reset-password')
+async def reset_password(data: user_schemas.ResetPassword,
+                         user: user_models.User = Depends(deps.token.validate_access_token)) -> Response:
+    if not user.check_password(data.old_password):
+        raise exceptions.user.not_correct_odl_password
+
+    user.set_password(data.new_password)
+    await user.save()
     return Response(status_code=status.HTTP_200_OK, content='success')

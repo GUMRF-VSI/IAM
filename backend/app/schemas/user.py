@@ -13,6 +13,11 @@ from security.core.base import password_regex
 from models import User
 
 
+class ResetPassword(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class UserORM(UserBase):
     id: int
 

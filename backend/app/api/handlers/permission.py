@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.post('/create', response_model=permission_schemas.PermissionORM)
 async def create_permission(permission_data: permission_schemas.PermissionCreate) -> permission_models.Permission:
-    db_permission = await permission_models.Permission.create(**permission_data.model_dump())
+    db_permission = await permission_models.Permission.create(**permission_data.dict())
     return db_permission
 
 
@@ -31,7 +31,7 @@ async def get_permission(permission_id: int) -> permission_models.Permission:
 async def update_permission(permission_id: int,
                             permission_data: permission_schemas.PermissionUpdate) -> permission_models.Permission:
     db_permission = await get_object_or_404(permission_models.Permission, id=permission_id)
-    await db_permission.update_from_dict(permission_data.model_dump())
+    await db_permission.update_from_dict(permission_data.dict())
     return db_permission
 
 

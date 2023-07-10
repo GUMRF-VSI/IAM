@@ -2,7 +2,7 @@ from datetime import datetime
 
 from tortoise import fields
 
-from security import password as password_logic
+from security.utils import password as password_logic
 from models.base.base_model import CustomModel
 
 
