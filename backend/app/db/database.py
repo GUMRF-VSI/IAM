@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
 from config.settings import settings
@@ -23,3 +24,7 @@ def init_db(app: FastAPI) -> None:
         generate_schemas=False,
         add_exception_handlers=True,
     )
+
+
+def init_models() -> None:
+    Tortoise.init_models(settings.models, 'models')

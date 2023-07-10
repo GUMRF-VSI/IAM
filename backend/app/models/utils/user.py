@@ -1,14 +1,6 @@
 from typing import List, Dict
 
 from models import User, Permission
-from api import exceptions
-
-
-async def get_user(user_id: int) -> User:
-    db_user = await User.get(id=user_id)
-    if not db_user:
-        raise exceptions.user.not_found
-    return db_user
 
 
 async def get_permissions(permissions: Permission) -> List[Dict]:

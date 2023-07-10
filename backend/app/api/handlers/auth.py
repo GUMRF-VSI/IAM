@@ -2,33 +2,32 @@ from uuid import UUID
 
 from fastapi import APIRouter, Response, status
 
-import models
-from schemas import token, auth
 from api import exceptions
+from models import user as user_models, session as session_models
+from schemas import token as token_schemas, auth as auth_schemas
 from models.utils.session import get_or_create_session
-from security.token.generation import generate_tokens
-from security.token.validation import validate_refresh_token
+from security.token import generation, validation
 
 router = APIRouter()
 
 
 @router.post("/token")
-async def token_auth(auth_data: auth.UserAuth) -> token.Tokens:
-    db_user = await models.User.filter(email=auth_data.email).first()
+async def token_auth(auth_data: auth_schemas.UserAuth) -> token_schemas.Tokens:
+    db_user = await user_models.User.filter(email=auth_data.email).first()
 
     if not db_user or not db_user.check_password(auth_data.password):
-        raise exceptions.user.invalid_cred
+        raise exceptions.auth.invalid_cred
 
     session = await get_or_create_session(db_user)
 
-    tokens = await generate_tokens(user=db_user, session=session)
+    tokens = await generation.generate_tokens(user=db_user, session=session)
 
     return tokens
 
 
 @router.get('/logout/{session_uuid}')
 async def logout(session_uuid: UUID) -> Response:
-    session = await models.Session.filter(session_id=session_uuid).first()
+    session = await session_models.Session.filter(session_id=session_uuid).first()
 
     if not session:
         return Response(content='You are already logout', status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -38,15 +37,15 @@ async def logout(session_uuid: UUID) -> Response:
 
 
 @router.post('/refresh')
-async def token_refresh(refresh_token: token.RefreshToken) -> token.AccessToken:
-    token_data = await validate_refresh_token(refresh_token)
+async def token_refresh(refresh_token: token_schemas.RefreshToken) -> token_schemas.AccessToken:
+    token_data = await validation.validate_refresh_token(refresh_token)
 
-    session = await models.Session.filter(uuid=token_data.sid).first()
-    db_user = await models.User.filter(uuid=UUID(token_data.sub)).first()
+    session = await session_models.Session.filter(uuid=token_data.sid).first()
+    db_user = await session.user.first()
 
     if not (session and db_user):
         raise exceptions.token.invalid_token
 
-    tokens = await generate_tokens(db_user, session)
+    tokens = await generation.generate_tokens(db_user, session)
 
-    return token.AccessToken(access=tokens.access)
+    return token_schemas.AccessToken(access=tokens.access)
