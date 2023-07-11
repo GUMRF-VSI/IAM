@@ -1,12 +1,14 @@
 from typing import TypeVar, Type
 
+from functools import wraps
+
 from fastapi import Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from models.base.base_model import CustomModel
 from config.constants import ActionsTypes
 from models import user as user_models
-from api.exceptions import user as user_exceptions
+from api import exceptions
 from security.utils.token import validate_access_token
 
 ModelType = TypeVar("ModelType", bound=CustomModel)
@@ -21,22 +23,57 @@ class BasePermission:
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
-    async def __check_permissions(self, token: str, action: ActionsTypes) -> Type[ModelType]:
+    async def __check_permissions(self, token: str, action: ActionsTypes) -> bool:
         token_data = await validate_access_token(token)
+        user = await user_models.User.filter(uuid=token_data.sub)
+        if not user:
+            raise exceptions.token.invalid_token
         for role in token_data.roles:
             for obj, actions in role.items():
                 if obj == self.model.table and action.name in actions:
-                    return await self.model.filter(uuid=token_data.sub).first()
-        raise user_exceptions.forbidden
+                    return True
+        raise exceptions.user.forbidden
 
-    async def can_create(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> Type[ModelType]:
+    async def check_create_permission(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> bool:
         return await self.__check_permissions(auth_token.credentials, self.actions.create)
 
-    async def can_delete(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> Type[ModelType]:
+    async def check_delete_permission(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> bool:
         return await self.__check_permissions(auth_token.credentials, self.actions.delete)
 
-    async def can_retrieve(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> Type[ModelType]:
+    async def check_retrieve_permission(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> bool:
         return await self.__check_permissions(auth_token.credentials, self.actions.retrieve)
 
-    async def can_update(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> Type[ModelType]:
+    async def check_update_permission(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> bool:
         return await self.__check_permissions(auth_token.credentials, self.actions.update)
+
+    def create_permission(self, func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            await self.check_create_permission()
+            return await func(*args, **kwargs)
+
+        return wrapper
+
+    def retrieve_permission(self, func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            await self.check_retrieve_permission()
+            return await func(*args, **kwargs)
+
+        return wrapper
+
+    def update_permission(self, func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            await self.check_update_permission()
+            return await func(*args, **kwargs)
+
+        return wrapper
+
+    def delete_permission(self, func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            await self.check_delete_permission()
+            return await func(*args, **kwargs)
+
+        return wrapper

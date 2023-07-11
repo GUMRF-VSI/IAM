@@ -8,11 +8,13 @@ from api import exceptions, deps
 from models import user as user_models
 from schemas import user as user_schemas
 from db.shortcuts import get_object_or_404
+from security.permission import user as user_permissions
 
 router = APIRouter()
 
 
 @router.post("/create", response_model=user_schemas.UserORM)
+@user_permissions.create_permission
 async def create_user(user_data: user_schemas.UserCreate) -> user_models.User:
     is_user_exist = await user_models.User.filter(email=user_data.email).exists()
 
@@ -27,18 +29,21 @@ async def create_user(user_data: user_schemas.UserCreate) -> user_models.User:
 
 
 @router.get('/list', response_model=List[user_schemas.UserORM])
+@user_permissions.retrieve_permission
 async def users_list() -> List[user_models.User]:
     users = await user_models.User.all()
     return users
 
 
 @router.get('/{user_id}', response_model=user_schemas.UserORM)
+@user_permissions.retrieve_permission
 async def user_retrieve(user_id: UUID) -> user_models.User:
     db_user = await get_object_or_404(user_models.User, uuid=user_id)
     return db_user
 
 
-@router.patch('/user_id', response_model=user_schemas.UserORM)
+@router.patch('/{user_id}', response_model=user_schemas.UserORM)
+@user_permissions.update_permission
 async def update_user(user_id: UUID, user_data: user_schemas.UserUpdate):
     db_user = await get_object_or_404(user_models.User, uuid=user_id)
     await db_user.update_from_dict(**user_data.dict())
@@ -46,6 +51,7 @@ async def update_user(user_id: UUID, user_data: user_schemas.UserUpdate):
 
 
 @router.delete('/{user_id}')
+@user_permissions.delete_permission
 async def delete_user(user_id: UUID):
     db_user = await get_object_or_404(user_models.User, uuid=user_id)
     await db_user.delete()
