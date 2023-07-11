@@ -1,6 +1,6 @@
 from jose import jwt
 
-from config.settings import settings
+from core.settings import settings
 from schemas import token as token_schemas
 from api.exceptions import token as token_exceptions
 from models import session as session_models

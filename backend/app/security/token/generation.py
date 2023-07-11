@@ -2,7 +2,7 @@ from jose import jwt
 
 from datetime import datetime, timedelta
 
-from config.settings import settings
+from core.settings import settings
 from schemas import token
 from models.user import User
 from models.session import Session

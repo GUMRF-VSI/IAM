@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 
 from api.routers import api_router
-from config.settings import settings
+from core.settings import settings
 from db.database import init_db, init_models
 
 logger = logging.getLogger("uvicorn")

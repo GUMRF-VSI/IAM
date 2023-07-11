@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
-from config.settings import settings
+from core.settings import settings
 
 
 TORTOISE_ORM = {
