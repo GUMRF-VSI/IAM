@@ -9,11 +9,15 @@ COPY ../requirements.txt ./requirements.txt
 # Устанавливем nano для работы с файлыми внутри контейнера (необязательно)
 RUN apt-get update \
  && apt-get install -y -qq --no-install-recommends curl nano iputils-ping ethtool tcpdump jq git \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/* \
+ && pip install poetry
 
-# Устанавливаем зависимости
-RUN python -m pip install pip --upgrade \
- && python -m pip install -r requirements.txt
+# Copy only requirements to cache them in docker layer
+COPY poetry.lock pyproject.toml /app/
+
+# Project initialization:
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
 
 # Копируем исходные файлы
 COPY . /app

@@ -29,9 +29,10 @@ class BasePermission:
         if not user:
             raise exceptions.token.invalid_token
         for role in token_data.roles:
-            for obj, actions in role.items():
-                if obj == self.model.table and action.name in actions:
-                    return True
+            for role_name, permissions in role.items():
+                for permission in permissions:
+                    if self.model.Meta.table in permission.keys() and action.name in permission[self.model.Meta.table]:
+                        return True
         raise exceptions.user.forbidden
 
     async def check_create_permission(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> bool:

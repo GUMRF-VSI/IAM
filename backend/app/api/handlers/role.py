@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Response, status, Depends
 
 from models import role as role_models, permission as permissions_models
@@ -18,9 +20,11 @@ async def create_role(role_data: role_schemas.RoleCreate) -> role_models.Role:
     return db_role
 
 
-@router.get('/list', dependencies=[Depends(role_permissions.check_retrieve_permission)])
-async def roles_list():
-    ...
+@router.get('/list', response_model=List[role_schemas.RoleORM],
+            dependencies=[Depends(role_permissions.check_retrieve_permission)])
+async def roles_list() -> List[role_models.Role]:
+    roles = await role_models.Role.all()
+    return roles
 
 
 @router.get('/{role_id}', response_model=role_schemas.RoleORM,
