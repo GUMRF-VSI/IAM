@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Response, status
-
+from fastapi import APIRouter, Response, status, Depends
 
 from models import role as role_models, permission as permissions_models
 from schemas import role as role_schemas
@@ -9,8 +8,8 @@ from security.permission import role as role_permissions
 router = APIRouter()
 
 
-@router.post('/create', response_model=role_schemas.RoleORM)
-@role_permissions.create_permission
+@router.post('/create', response_model=role_schemas.RoleORM,
+             dependencies=[Depends(role_permissions.check_create_permission)])
 async def create_role(role_data: role_schemas.RoleCreate) -> role_models.Role:
     db_role = role_models.Role(name=role_data.name)
     db_permissions = await permissions_models.Permission.filter(id__in=role_data.permissions)
@@ -19,20 +18,19 @@ async def create_role(role_data: role_schemas.RoleCreate) -> role_models.Role:
     return db_role
 
 
-@router.get('/list')
-@role_permissions.retrieve_permission
+@router.get('/list', dependencies=[Depends(role_permissions.check_retrieve_permission)])
 async def roles_list():
     ...
 
 
-@router.get('/{role_id}', response_model=role_schemas.RoleORM)
-@role_permissions.retrieve_permission
+@router.get('/{role_id}', response_model=role_schemas.RoleORM,
+            dependencies=[Depends(role_permissions.check_retrieve_permission)])
 async def get_role(role_id: int) -> role_models.Role:
     return await get_object_or_404(role_models.Role, id=role_id)
 
 
-@router.patch('/{role_id}', response_model=role_schemas.RoleORM)
-@role_permissions.update_permission
+@router.patch('/{role_id}', response_model=role_schemas.RoleORM,
+              dependencies=[Depends(role_permissions.check_update_permission)])
 async def update_role(role_id: int, role_data: role_schemas.RoleUpdate) -> role_models.Role:
     db_role = await role_models.Role.update_from_dict(data={'name': role_data.name})
     db_permissions = await permissions_models.Permission.filter(id__in=role_data.permissions)
@@ -41,8 +39,7 @@ async def update_role(role_id: int, role_data: role_schemas.RoleUpdate) -> role_
     return db_role
 
 
-@router.delete('/{role_id}')
-@role_permissions.delete_permission
+@router.delete('/{role_id}', dependencies=[Depends(role_permissions.check_delete_permission)])
 async def delete_role(role_id: int) -> Response:
     db_role = await get_object_or_404(role_models.Role, id=role_id)
     await db_role.delete()

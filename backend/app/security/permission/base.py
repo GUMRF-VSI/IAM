@@ -45,35 +45,3 @@ class BasePermission:
 
     async def check_update_permission(self, auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> bool:
         return await self.__check_permissions(auth_token.credentials, self.actions.update)
-
-    def create_permission(self, func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            await self.check_create_permission()
-            return await func(*args, **kwargs)
-
-        return wrapper
-
-    def retrieve_permission(self, func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            await self.check_retrieve_permission()
-            return await func(*args, **kwargs)
-
-        return wrapper
-
-    def update_permission(self, func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            await self.check_update_permission()
-            return await func(*args, **kwargs)
-
-        return wrapper
-
-    def delete_permission(self, func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            await self.check_delete_permission()
-            return await func(*args, **kwargs)
-
-        return wrapper
