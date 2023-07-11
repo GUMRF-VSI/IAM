@@ -37,7 +37,6 @@ class Settings(BaseSettings):
         return self.APP_MODELS + ['aerich.models']
 
     class Config:
-        env_file = ".env"
         case_sensitive = True
         env_nested_delimiter = '__'
 

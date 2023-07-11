@@ -3,9 +3,6 @@ FROM python:3.11-slim-bullseye
 # Устанавливаем рабочие дерикторию
 WORKDIR /app
 
-# Копируем файлы зависимостей
-COPY ../requirements.txt ./requirements.txt
-
 # Устанавливем nano для работы с файлыми внутри контейнера (необязательно)
 RUN apt-get update \
  && apt-get install -y -qq --no-install-recommends curl nano iputils-ping ethtool tcpdump jq git \

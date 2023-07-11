@@ -6,7 +6,7 @@ from fastapi import Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from models.base.base_model import CustomModel
-from config.constants import ActionsTypes
+from core.constants import ActionsTypes
 from models import user as user_models
 from api import exceptions
 from security.utils.token import validate_access_token
