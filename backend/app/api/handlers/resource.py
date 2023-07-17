@@ -40,8 +40,7 @@ async def update_resource(resource_id: int, resource_data: resource_schemas.Reso
     return resource
 
 
-@router.delete('/{resource_id}', response_model=resource_schemas.ResourceORM,
-               dependencies=[Depends(resource_permissions.check_delete_permission)])
+@router.delete('/{resource_id}', dependencies=[Depends(resource_permissions.check_delete_permission)])
 async def delete_resource_token(resource_id: int) -> JSONResponse:
     resource = await get_object_or_404(resource_models.Resource, id=resource_id)
     try:
