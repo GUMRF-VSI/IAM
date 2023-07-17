@@ -16,6 +16,6 @@ scheduler.autodiscover_tasks()
 scheduler.conf.beat_schedule = {
     'every': {
         'task': 'scheduler.remove_outdated_session',
-        'schedule': 15,
+        'schedule': settings.SECURITY.REFRESH_TOKEN_EXPIRE,
     }
 }
