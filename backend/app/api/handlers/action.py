@@ -1,6 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Response, status, Depends
+from fastapi import APIRouter, status, Depends
+from fastapi.responses import JSONResponse
+
+from tortoise.exceptions import OperationalError
 
 from models import action as action_models
 from schemas import action as action_schemas
@@ -12,7 +15,7 @@ router = APIRouter()
 
 @router.post('/create', response_model=action_schemas.ActionORM, dependencies=[Depends(action.check_create_permission)])
 async def create_action(action_data: action_schemas.ActionCreate) -> action_models.Action:
-    db_action = await action_models.Action.create(**action_data.dict())
+    db_action = await action_models.Action.create(**action_data.model_dump())
     return db_action
 
 
@@ -34,12 +37,15 @@ async def get_action(action_id: int) -> action_models.Action:
               dependencies=[Depends(action.check_update_permission)])
 async def update_action(action_id: int, action_data: action_schemas.ActionUpdate) -> action_models.Action:
     db_action = await get_object_or_404(action_models.Action, id=action_id)
-    await db_action.update_from_dict(action_data.dict())
+    await db_action.update_from_dict(action_data.model_dump())
     return db_action
 
 
 @router.delete('/{action_id}', dependencies=[Depends(action.check_delete_permission)])
-async def delete_action(action_id: int):
+async def delete_action(action_id: int) -> JSONResponse:
     db_action = await get_object_or_404(action_models.Action, id=action_id)
-    await db_action.delete()
-    return Response(status_code=status.HTTP_200_OK, content='success')
+    try:
+        await db_action.delete()
+    except OperationalError:
+        JSONResponse(status_code=status.HTTP_200_OK, content={'success': False})
+    return JSONResponse(status_code=status.HTTP_200_OK, content={'success': True})

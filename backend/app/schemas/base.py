@@ -29,3 +29,7 @@ class PermissionBase(BaseModel):
 
 class BaseRole(BaseModel):
     name: str
+
+
+class ResourceBase(BaseModel):
+    name: str

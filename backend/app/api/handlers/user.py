@@ -2,7 +2,10 @@ from uuid import UUID
 
 from typing import List
 
-from fastapi import APIRouter, Response, status, Depends
+from fastapi import APIRouter, status, Depends
+from fastapi.responses import JSONResponse
+
+from tortoise.exceptions import OperationalError
 
 from api import exceptions, deps
 from models import user as user_models
@@ -59,10 +62,13 @@ async def delete_user(user_id: UUID):
 
 @router.post('/reset-password')
 async def reset_password(data: user_schemas.ResetPassword,
-                         user: user_models.User = Depends(deps.token.validate_access_token)) -> Response:
+                         user: user_models.User = Depends(deps.token.validate_access_token)) -> JSONResponse:
     if not user.check_password(data.old_password):
         raise exceptions.user.not_correct_odl_password
 
     user.set_password(data.new_password)
-    await user.save()
-    return Response(status_code=status.HTTP_200_OK, content='success')
+    try:
+        await user.save()
+    except OperationalError:
+        JSONResponse(status_code=status.HTTP_200_OK, content={'success': False})
+    return JSONResponse(status_code=status.HTTP_200_OK, content={'success': True})

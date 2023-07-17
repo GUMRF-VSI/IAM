@@ -4,9 +4,17 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from api import exceptions
 from schemas.token import RefreshToken
 from security.utils import token as token_utils
-from models import session as session_models, user as user_models
+from models import session as session_models, user as user_models, resource as resource_models
 
 token_key = HTTPBearer()
+
+
+async def validate_resource_token(
+        auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> resource_models.Resource:
+    resource = await resource_models.Resource.filter(token=auth_token.credentials).first()
+    if not resource:
+        raise exceptions.token.invalid_token
+    return resource
 
 
 async def validate_access_token(auth_token: HTTPAuthorizationCredentials = Security(token_key)) -> user_models.User:

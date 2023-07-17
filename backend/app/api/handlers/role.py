@@ -1,6 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Response, status, Depends
+from fastapi import APIRouter, status, Depends
+from fastapi.responses import JSONResponse
+
+from tortoise.exceptions import OperationalError
 
 from models import role as role_models, permission as permissions_models
 from schemas import role as role_schemas
@@ -44,7 +47,10 @@ async def update_role(role_id: int, role_data: role_schemas.RoleUpdate) -> role_
 
 
 @router.delete('/{role_id}', dependencies=[Depends(role_permissions.check_delete_permission)])
-async def delete_role(role_id: int) -> Response:
+async def delete_role(role_id: int) -> JSONResponse:
     db_role = await get_object_or_404(role_models.Role, id=role_id)
-    await db_role.delete()
-    return Response(status_code=status.HTTP_200_OK, content='success')
+    try:
+        await db_role.delete()
+    except OperationalError:
+        JSONResponse(status_code=status.HTTP_200_OK, content={'success': False})
+    return JSONResponse(status_code=status.HTTP_200_OK, content={'success': True})
