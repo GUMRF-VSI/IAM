@@ -24,10 +24,10 @@ class UserORM(UserBase):
     is_staff: bool
     is_active: bool
 
-    last_login: Optional[bool]
+    last_login: Optional[datetime]
 
     created_at: datetime
-    updated_at: Optional[bool]
+    updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True
