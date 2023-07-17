@@ -1,8 +1,13 @@
+import logging
+
 from fastapi import FastAPI
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
 from core.settings import settings
+
+
+logger = logging.getLogger('uvicorn')
 
 
 TORTOISE_ORM = {
@@ -17,6 +22,7 @@ TORTOISE_ORM = {
 
 
 def init_db(app: FastAPI) -> None:
+    logger.info('Register tortoise')
     register_tortoise(
         app,
         db_url=settings.postgres_db_url,
@@ -27,4 +33,5 @@ def init_db(app: FastAPI) -> None:
 
 
 def init_models() -> None:
+    logger.info('Init database')
     Tortoise.init_models(settings.models, 'models')

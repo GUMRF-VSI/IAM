@@ -25,8 +25,52 @@ services:
       - .env
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/backend.dockerfile
     ports:
       - 8000:8000
+    networks:
+      - iam-service
+
+#  celery-worker:
+#    build:
+#      context: ..
+#      dockerfile: docker/celery-worker.dockerfile
+#    env_file:
+#      - .env
+#    depends_on:
+#      - iam-service
+#      - redis
+
+  celery-beat:
+    build:
+      context: ..
+      dockerfile: docker/celery-beat.dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - iam-service
+      - redis
+    networks:
+      - iam-service
+
+  redis:
+    image: redis:7
+    networks:
+      - iam-service
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: docker/backend.dockerfile
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - 5556:5555
+    env_file:
+      - .env
+    depends_on:
+      - iam-service
+      - redis
+#      - celery-worker
+      - celery-beat
     networks:
       - iam-service

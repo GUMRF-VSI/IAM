@@ -31,18 +31,19 @@ def __create_identity_token(user: User, session: Session, exp: int, iat: int) ->
     return jwt.encode(identity_token_data.model_dump(), settings.SECURITY.SECRET_KEY, settings.SECURITY.ALGORITHM)
 
 
-async def generate_tokens(user: User, session: Session,
-                          expires_delta: int = settings.SECURITY.ACCESS_TOKEN_EXPIRE_MINUTES) -> token.Tokens:
+async def generate_tokens(user: User, session: Session) -> token.Tokens:
     datetime_now = datetime.utcnow()
 
-    exp = int((datetime_now + timedelta(expires_delta)).timestamp())
+    exp_access = int((datetime_now + timedelta(settings.SECURITY.ACCESS_TOKEN_EXPIRE)).timestamp())
+    exp_refresh = int((datetime_now + timedelta(settings.SECURITY.REFRESH_TOKEN_EXPIRE)).timestamp())
+    exp_identity = int((datetime_now + timedelta(settings.SECURITY.IDENTITY_TOKEN_EXPIRE)).timestamp())
     iat = int(datetime_now.timestamp())
 
-    access_token = await create_access_token(user=user, session=session, exp=exp, iat=iat,
+    access_token = await create_access_token(user=user, session=session, exp=exp_access, iat=iat,
                                              auth_time=int(datetime_now.timestamp()))
 
     return token.Tokens(
         access=access_token,
-        refresh=__create_refresh_token(user=user, session=session, exp=exp, iat=iat),
-        identity=__create_identity_token(user=user, session=session, exp=exp, iat=iat)
+        refresh=__create_refresh_token(user=user, session=session, exp=exp_refresh, iat=iat),
+        identity=__create_identity_token(user=user, session=session, exp=exp_identity, iat=iat)
     )

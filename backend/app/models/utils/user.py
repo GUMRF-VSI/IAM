@@ -1,6 +1,24 @@
+import logging
+
 from typing import List, Dict
 
 from models import User, Permission
+from core.settings import settings
+
+
+logger = logging.getLogger("uvicorn")
+
+
+def create_first_superuser():
+    logger.info('Creating first superuser')
+    is_user_exist = User.filter(email=settings.SUPERUSER.EMAIL).exists()
+    print(is_user_exist)
+    if not is_user_exist:
+        user_data = settings.SUPERUSER.model_dump(by_alias=True)
+        user_data.update(is_superuser=True)
+        User.create(user_data)
+        logger.info('Superuser successfully created')
+    logger.info('Superuser already exist')
 
 
 async def get_permissions(permissions: Permission) -> List[Dict]:

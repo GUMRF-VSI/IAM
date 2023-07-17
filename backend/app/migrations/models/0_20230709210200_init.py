@@ -5,7 +5,7 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
         CREATE TABLE IF NOT EXISTS "user" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "is_staff" BOOL NOT NULL  DEFAULT False,
+    "is_superuser" BOOL NOT NULL  DEFAULT False,
     "is_active" BOOL NOT NULL  DEFAULT True,
     "last_login" TIMESTAMPTZ,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT '2023-07-09T21:02:00.661893',

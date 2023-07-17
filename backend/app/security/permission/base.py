@@ -25,7 +25,9 @@ class BasePermission:
 
     async def __check_permissions(self, token: str, action: ActionsTypes) -> bool:
         token_data = await validate_access_token(token)
-        user = await user_models.User.filter(uuid=token_data.sub)
+        user = await user_models.User.filter(uuid=token_data.sub).first()
+        if user and user.is_superuser:
+            return True
         if not user:
             raise exceptions.token.invalid_token
         for role in token_data.roles:

@@ -7,7 +7,7 @@ from models.base.base_model import CustomModel
 
 
 class AbstractUser(CustomModel):
-    is_staff = fields.BooleanField(default=False)
+    is_superuser = fields.BooleanField(default=False)
     is_active = fields.BooleanField(default=True)
 
     last_login = fields.DatetimeField(null=True)
